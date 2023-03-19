@@ -2,7 +2,7 @@ import Playlists from "@/components/Playlists";
 import { useSpotifyPlaylists } from "@/hooks/useSpotifyPlaylists";
 import styles from "@/styles/Home.module.css";
 import { getProviders, signIn, signOut, useSession } from "next-auth/react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { cosineSim } from "@/utils/cosineSimilarity";
 
 export default function Home({ providers }) {
@@ -35,10 +35,14 @@ export default function Home({ providers }) {
             setFocusedPlaylist={setFocusedPlaylist}
           />
           <div className="w-full">
-            <div>Selected a playlist!</div>
-            <button onClick={() => getGraphData(focusedPlaylist)}>
-              Calculate graphData
-            </button>
+            {focusedPlaylist.length > 0 && (
+              <Fragment>
+                <div>Selected a playlist!</div>
+                <button onClick={() => getGraphData(focusedPlaylist)}>
+                  Calculate graphData
+                </button>
+              </Fragment>
+            )}
           </div>
         </div>
       </div>
@@ -79,6 +83,7 @@ export default function Home({ providers }) {
     // filter for only strong relations
     graphData.links = graphData.links.filter((link) => link.value > 0.99);
 
+    console.log("graphData", graphData);
     return graphData;
   }
 }

@@ -7,9 +7,6 @@ const Playlists = ({ playlists, setFocusedPlaylist }) => {
     const features = await Promise.all(
       items.map((item) => axios.get(`/api/features/${item.track.id}`))
     );
-    console.log("features", features);
-
-    console.log("items", items);
 
     const transformedFeatures = features.map(({ data }) => {
       const trackItem = items.find((item) => data.id === item.track.id);
