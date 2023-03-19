@@ -6,6 +6,7 @@ export const authOptions = {
     SpotifyProvider({
       clientId: process.env.SPOTIFY_API_CLIENT_ID,
       clientSecret: process.env.SPOTIFY_API_CLIENT_SECRET,
+      secret: process.env.SECRET,
       scope: "user-top-read",
     }),
   ],
