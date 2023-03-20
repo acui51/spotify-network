@@ -8,18 +8,18 @@ import * as d3 from "d3";
 import d3Tip from "d3-tip";
 
 const similarityTypes = [
-  { value: 'all', label: 'all' },
-  { value: 'acousticness', label: 'acousticness' },
-  { value: 'energy', label: 'energy' },
-  { value: 'instrumentalness', label: 'instrumentalness' },
-  { value: 'key', label: 'key' },
-  { value: 'liveness', label: 'liveness' },
-  { value: 'loudness', label: 'loudness' },
-  { value: 'mode', label: 'mode' },
-  { value: 'speechiness', label: 'speechiness' },
-  { value: 'tempo', label: 'tempo' },
-  { value: 'time_signature', label: 'time signature' },
-  { value: 'valence', label: 'valence' },
+  { value: "all", label: "all" },
+  { value: "acousticness", label: "acousticness" },
+  { value: "energy", label: "energy" },
+  { value: "instrumentalness", label: "instrumentalness" },
+  { value: "key", label: "key" },
+  { value: "liveness", label: "liveness" },
+  { value: "loudness", label: "loudness" },
+  { value: "mode", label: "mode" },
+  { value: "speechiness", label: "speechiness" },
+  { value: "tempo", label: "tempo" },
+  { value: "time_signature", label: "time signature" },
+  { value: "valence", label: "valence" },
 ];
 
 export default function Home({ providers }) {
@@ -27,8 +27,8 @@ export default function Home({ providers }) {
   const { data: playlistData, loading: playlistLoading } =
     useSpotifyPlaylists(session);
   const [focusedPlaylist, setFocusedPlaylist] = useState([]);
-  const [selectedPlaylistName, setSelectedPlaylistName] = useState("")
-  const [similarityMetric, setSimilarityMetric] = useState("all")
+  const [selectedPlaylistName, setSelectedPlaylistName] = useState("");
+  const [similarityMetric, setSimilarityMetric] = useState("all");
 
   const handleChange = (event) => {
     if (controlEnabled) {
@@ -42,7 +42,6 @@ export default function Home({ providers }) {
       // Clear graph
       d3.select("#graph").html("");
       const data = getGraphData(focusedPlaylist);
-      console.log("data", data);
       const width = 600;
       const height = 600;
 
@@ -53,11 +52,29 @@ export default function Home({ providers }) {
         .attr("width", width)
         .attr("height", height);
 
+      const group = svg.append("g");
+
+      // Initialize the zoom
+      const { height: h, width: w } = d3
+        .select("#graph")
+        .node()
+        .getBoundingClientRect();
+      const zoom = d3
+        .zoom()
+        .scaleExtent([1, 5])
+        .translateExtent([
+          [0, 0],
+          [w + 200, h + 200],
+        ])
+        .on("zoom", handleZoom);
+      initZoom();
+
       const xScale = d3.scaleLinear().range([0, width]);
       const yScale = d3.scaleLinear().range([height, 0]);
 
       // Add a window resize listener to make the graph responsive
       d3.select(window).on("resize", resize);
+      resize();
 
       // Tooltip
       const tip = d3Tip()
@@ -65,20 +82,22 @@ export default function Home({ providers }) {
         .html((e) => {
           return e.target.__data__.id;
         });
-      svg.call(tip);
+      group.call(tip);
 
-      var links = data.links
+      var links = data.links;
 
       // Initialize the links
-      const link = svg
+      const link = group
         .selectAll("line")
         .data(links)
         .join("line")
         .style("stroke", "#aaa")
-        .style("stroke-width", function (d) { return ((1 - d.value) * 100 * 3.5); });
+        .style("stroke-width", function (d) {
+          return (1 - d.value) * 100 * 3.5;
+        });
 
       // Initialize the nodes
-      const node = svg
+      const node = group
         .selectAll("circle")
         .data(data.nodes)
         .join("circle")
@@ -133,20 +152,24 @@ export default function Home({ providers }) {
       }
 
       function resize() {
-        const containerWidth = d3
+        const { width: containerWidth, height: containerHeight } = d3
           .select("#graph")
           .node()
-          .getBoundingClientRect().width;
-        const containerHeight = containerWidth * (height / width);
+          .getBoundingClientRect();
 
         svg.attr("width", containerWidth).attr("height", containerHeight);
 
         xScale.range([0, containerWidth]);
         yScale.range([containerHeight, 0]);
-
-        // update the positions of the nodes and links
       }
-      resize();
+
+      function initZoom() {
+        d3.select("svg").call(zoom);
+      }
+
+      function handleZoom(e) {
+        d3.select("svg g").attr("transform", e.transform);
+      }
     }
   }, [focusedPlaylist]);
 
@@ -156,40 +179,51 @@ export default function Home({ providers }) {
 
   return (
     <>
-      <div className={styles.main}>
+      <div className="h-screen">
         {Object.values(providers).map((provider) => {
           return status === "unauthenticated" ? (
-            <button key={provider.name} onClick={() => signIn()}>
+            <button
+              key={provider.name}
+              onClick={() => signIn()}
+              className="absolute top-2 right-2"
+            >
               Log in to {provider.name}
             </button>
           ) : (
-            <button className={'bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded absolute top-2 right-3'} key={provider.name} onClick={() => signOut()}>
+            <button
+              className={
+                "bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded absolute top-2 right-3"
+              }
+              key={provider.name}
+              onClick={() => signOut()}
+            >
               Log out of {provider.name}
             </button>
           );
         })}
-        <div className='text-xl flex flex-row justify-center pt-3'>
+        <div className="text-xl flex flex-row justify-center pt-3">
           Showing Similarity Graph for: {selectedPlaylistName}
         </div>
-        <div className="flex">
+        <div className="flex h-screen overflow-y-scroll">
           <Playlists
             playlists={playlistData}
             setSelectedPlaylistName={setSelectedPlaylistName}
             setFocusedPlaylist={setFocusedPlaylist}
           />
-          <div className="w-full">
-            <div id="graph"></div>
-          </div>
-          <div className='bg-white border border-gray-900 bg-opacity-80 rounded-lg m-2 px-2 pb-2 pt-1 absolute right-0 bottom-0 text-lg opacity-80 flex flex-row drop-shadow-md'>
+          <div className="w-full" id="graph"></div>
+          <div className="bg-white border border-gray-900 bg-opacity-80 rounded-lg m-2 px-2 pb-2 pt-1 absolute right-0 bottom-0 text-lg opacity-80 flex flex-row drop-shadow-md">
             <div>
               <form>
-                <div className='font-bold text-center'>
-                  Similarity Metric
-                </div>
-                {similarityTypes.map(e => (
-                  <label className='flex flex-row' key={e.value}>
-                    <input type='radio' value={e.value} checked={similarityMetric === e.value} onChange={handleChange} />
-                    <span className='ml-2'>{e.label}</span>
+                <div className="font-bold text-center">Similarity Metric</div>
+                {similarityTypes.map((e) => (
+                  <label className="flex flex-row" key={e.value}>
+                    <input
+                      type="radio"
+                      value={e.value}
+                      checked={similarityMetric === e.value}
+                      onChange={handleChange}
+                    />
+                    <span className="ml-2">{e.label}</span>
                   </label>
                 ))}
               </form>
