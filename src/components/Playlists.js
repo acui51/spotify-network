@@ -1,6 +1,10 @@
 import axios from "axios";
 
-const Playlists = ({ setSelectedPlaylistName, playlists, setFocusedPlaylist }) => {
+const Playlists = ({
+  setSelectedPlaylistName,
+  playlists,
+  setFocusedPlaylist,
+}) => {
   const fetchTrackFeatures = async (id) => {
     const { data } = await axios.get(`/api/playlists/${id}`);
     const items = data.items;
@@ -38,14 +42,18 @@ const Playlists = ({ setSelectedPlaylistName, playlists, setFocusedPlaylist }) =
       {playlists?.items &&
         playlists.items.map((playlist) => {
           return (
-            <div 
-              onClick={() => 
-                {fetchTrackFeatures(playlist.id)
-                  setSelectedPlaylistName(playlist.name)}}
+            <div
+              onClick={() => {
+                fetchTrackFeatures(playlist.id);
+                setSelectedPlaylistName(playlist.name);
+              }}
               key={playlist.id}
               className="cursor-pointer"
             >
-              <div className = 'bg-white bg-opacity-50 py-2 px-4 rounded'> {playlist.name} </div>
+              <div className="bg-white bg-opacity-50 py-2 px-4 rounded">
+                {" "}
+                {playlist.name}{" "}
+              </div>
               <div className="pt-2"></div>
             </div>
           );
