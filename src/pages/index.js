@@ -80,7 +80,8 @@ export default function Home({ providers }) {
       const tip = d3Tip()
         .attr("class", "d3-tip")
         .html((e) => {
-          return e.target.__data__.id;
+          console.log("e", e)
+          return "Track Name: " + e.target.__data__.id + "<br><br>" + "Artist: " + e.target.__data__.artist ;
         });
       group.call(tip);
 
@@ -267,7 +268,8 @@ export default function Home({ providers }) {
     let maxWeight = 0;
     for (let i = 0; i < tracks.length; i++) {
       const trackName = tracks[i].metadata.name;
-      graphData.nodes.push({ id: trackName, group: 1 });
+      console.log("metadata", tracks[i].metadata)
+      graphData.nodes.push({ id: trackName, artist: tracks[i].metadata.artists[0]['name'], group: 1 });
       const trackFeature = tracks[i].features;
       for (let j = i + 1; j < tracks.length; j++) {
         const compTrackName = tracks[j].metadata.name;
