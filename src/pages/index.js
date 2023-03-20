@@ -12,6 +12,7 @@ export default function Home({ providers }) {
   const { data: playlistData, loading: playlistLoading } =
     useSpotifyPlaylists(session);
   const [focusedPlaylist, setFocusedPlaylist] = useState([]);
+  const [selectedPlaylistName, setSelectedPlaylistName] = useState("")
 
   useEffect(() => {
     if (focusedPlaylist.length > 0) {
@@ -139,14 +140,18 @@ export default function Home({ providers }) {
               Log in to {provider.name}
             </button>
           ) : (
-            <button key={provider.name} onClick={() => signOut()}>
+            <button className={'bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded absolute top-2 right-3'} key={provider.name} onClick={() => signOut()}>
               Log out of {provider.name}
             </button>
           );
         })}
+        <div className = 'text-xl flex flex-row justify-center pt-3'>
+          Showing Similarity Graph for: {selectedPlaylistName}
+        </div>
         <div className="flex">
           <Playlists
             playlists={playlistData}
+            setSelectedPlaylistName={setSelectedPlaylistName}
             setFocusedPlaylist={setFocusedPlaylist}
           />
           <div className="w-full">
