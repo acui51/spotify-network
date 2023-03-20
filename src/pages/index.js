@@ -79,6 +79,15 @@ export default function Home({ providers }) {
       // Tooltip
       const tip = d3Tip()
         .attr("class", "d3-tip")
+        .style("position", "fixed")
+        .style("text-align", "left")
+        .style("padding", "5px")
+        .style("font", "12px sans-serif")
+        .style("background", "white")
+        .style("opacity", "0.5")
+        .style("border", "1px solid gray")
+        .style("border-radius", "10px")
+        .style("z-index", "10")
         .html((e) => {
           console.log("e", e)
           return "Track Name: " + e.target.__data__.id + "<br><br>" + "Artist: " + e.target.__data__.artist ;
