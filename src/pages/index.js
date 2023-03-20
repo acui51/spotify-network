@@ -277,7 +277,6 @@ export default function Home({ providers }) {
             Object.values(trackFeature),
             Object.values(compTrackFeature)
           );
-          console.log("all weight", weight);
           minWeight = Math.min(minWeight, weight);
           maxWeight = Math.max(maxWeight, weight);
           graphData.links.push({
@@ -288,7 +287,6 @@ export default function Home({ providers }) {
         } else {
           const trackFeature = tracks[i].features[similarityMetric];
           const compTrackFeature = tracks[j].features[similarityMetric];
-          console.log("before calc");
           const weight =
             1 -
             Math.abs(trackFeature - compTrackFeature) /
