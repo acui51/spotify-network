@@ -237,7 +237,7 @@ export default function Home({ providers }) {
             setSelectedPlaylistName={setSelectedPlaylistName}
             setFocusedPlaylist={setFocusedPlaylist}
           />
-          <div className="w-full" id="graph"></div>
+          <div className="w-full h-screen overflow-y-scroll" id="graph"></div>
           <div className="bg-white border border-gray-900 bg-opacity-80 rounded-lg m-2 px-2 pb-2 pt-1 absolute right-0 bottom-0 text-lg opacity-80 flex flex-row drop-shadow-md">
             <div>
               <form>
