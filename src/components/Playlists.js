@@ -7,6 +7,7 @@ const Playlists = ({ playlists, setFocusedPlaylist }) => {
     const features = await Promise.all(
       items.map((item) => axios.get(`/api/features/${item.track.id}`))
     );
+    console.log("playlists", playlists)
 
     const transformedFeatures = features.map(({ data }) => {
       const trackItem = items.find((item) => data.id === item.track.id);
@@ -33,7 +34,7 @@ const Playlists = ({ playlists, setFocusedPlaylist }) => {
   };
 
   return (
-    <div className="flex flex-col w-64">
+    <div className="flex flex-col w-72 bg-white px-3">
       {playlists?.items &&
         playlists.items.map((playlist) => {
           return (
@@ -43,6 +44,7 @@ const Playlists = ({ playlists, setFocusedPlaylist }) => {
               className="cursor-pointer"
             >
               {playlist.name}
+              <div className="pt-2"></div>
             </div>
           );
         })}

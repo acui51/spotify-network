@@ -43,12 +43,15 @@ export default function Home({ providers }) {
         });
       svg.call(tip);
 
+      var links = data.links
+
       // Initialize the links
       const link = svg
         .selectAll("line")
-        .data(data.links)
+        .data(links)
         .join("line")
-        .style("stroke", "#aaa");
+        .style("stroke", "#aaa")
+        .style("stroke-width", function(d) { return ((1-d.value) * 100 * 3.5); });
 
       // Initialize the nodes
       const node = svg
