@@ -60,7 +60,7 @@ export default function Home({ providers }) {
         .getBoundingClientRect();
       const zoom = d3
         .zoom()
-        .scaleExtent([1, 5])
+        .scaleExtent([0.5, 5])
         .translateExtent([
           [0, 0],
           [w + 200, h + 200],
@@ -166,6 +166,7 @@ export default function Home({ providers }) {
           });
       }
 
+      // Resizes container responsively
       function resize() {
         const { width: containerWidth, height: containerHeight } = d3
           .select("#graph")
@@ -178,12 +179,15 @@ export default function Home({ providers }) {
         yScale.range([containerHeight, 0]);
       }
 
+      // Initializes and handle Zoom functions
       function initZoom() {
         d3.select("svg").call(zoom);
       }
 
       function handleZoom(e) {
         d3.select("svg g").attr("transform", e.transform);
+        // .attr("transform", "scale(.5, .5)");
+        // .attr("transform", "translate(100,50) scale(.5,.5)");
       }
     }
   }, [focusedPlaylist, similarityMetric]);
@@ -219,7 +223,7 @@ export default function Home({ providers }) {
         <div className="text-xl flex flex-row justify-center pt-3">
           Showing Similarity Graph for: {selectedPlaylistName}
         </div>
-        <div className="flex h-screen overflow-y-scroll">
+        <div className="flex">
           <Playlists
             playlists={playlistData}
             setSelectedPlaylistName={setSelectedPlaylistName}
