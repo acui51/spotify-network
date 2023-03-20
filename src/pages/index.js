@@ -7,11 +7,35 @@ import { cosineSim } from "@/utils/cosineSimilarity";
 import * as d3 from "d3";
 import d3Tip from "d3-tip";
 
+const similarityTypes = [
+  { value: "all", label: "all" },
+  { value: "acousticness", label: "acousticness" },
+  { value: "energy", label: "energy" },
+  { value: "instrumentalness", label: "instrumentalness" },
+  { value: "key", label: "key" },
+  { value: "liveness", label: "liveness" },
+  { value: "loudness", label: "loudness" },
+  { value: "mode", label: "mode" },
+  { value: "speechiness", label: "speechiness" },
+  { value: "tempo", label: "tempo" },
+  { value: "time_signature", label: "time signature" },
+  { value: "valence", label: "valence" },
+];
+
 export default function Home({ providers }) {
   const { data: session, status } = useSession();
   const { data: playlistData, loading: playlistLoading } =
     useSpotifyPlaylists(session);
   const [focusedPlaylist, setFocusedPlaylist] = useState([]);
+  const [selectedPlaylistName, setSelectedPlaylistName] = useState("");
+  const [similarityMetric, setSimilarityMetric] = useState("all");
+
+  const handleChange = (event) => {
+    if (controlEnabled) {
+      setSimilarityMetric(event.target.value);
+    }
+    // resetSelections();
+  };
 
   useEffect(() => {
     if (focusedPlaylist.length > 0) {
@@ -31,12 +55,16 @@ export default function Home({ providers }) {
       const group = svg.append("g");
 
       // Initialize the zoom
+      const { height: h, width: w } = d3
+        .select("#graph")
+        .node()
+        .getBoundingClientRect();
       const zoom = d3
         .zoom()
         .scaleExtent([1, 5])
         .translateExtent([
           [0, 0],
-          [1000, 1000],
+          [w + 200, h + 200],
         ])
         .on("zoom", handleZoom);
       initZoom();
@@ -124,14 +152,10 @@ export default function Home({ providers }) {
       }
 
       function resize() {
-        const containerWidth = d3
+        const { width: containerWidth, height: containerHeight } = d3
           .select("#graph")
           .node()
-          .getBoundingClientRect().width;
-        const containerHeight = d3
-          .select("#graph")
-          .node()
-          .getBoundingClientRect().height;
+          .getBoundingClientRect();
 
         svg.attr("width", containerWidth).attr("height", containerHeight);
 
@@ -167,20 +191,44 @@ export default function Home({ providers }) {
             </button>
           ) : (
             <button
+              className={
+                "bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded absolute top-2 right-3"
+              }
               key={provider.name}
               onClick={() => signOut()}
-              className="absolute top-2 right-2"
             >
               Log out of {provider.name}
             </button>
           );
         })}
-        <div className="flex">
+        <div className="text-xl flex flex-row justify-center pt-3">
+          Showing Similarity Graph for: {selectedPlaylistName}
+        </div>
+        <div className="flex h-screen overflow-y-scroll">
           <Playlists
             playlists={playlistData}
+            setSelectedPlaylistName={setSelectedPlaylistName}
             setFocusedPlaylist={setFocusedPlaylist}
           />
-          <div className="w-full h-screen" id="graph"></div>
+          <div className="w-full" id="graph"></div>
+          <div className="bg-white border border-gray-900 bg-opacity-80 rounded-lg m-2 px-2 pb-2 pt-1 absolute right-0 bottom-0 text-lg opacity-80 flex flex-row drop-shadow-md">
+            <div>
+              <form>
+                <div className="font-bold text-center">Similarity Metric</div>
+                {similarityTypes.map((e) => (
+                  <label className="flex flex-row" key={e.value}>
+                    <input
+                      type="radio"
+                      value={e.value}
+                      checked={similarityMetric === e.value}
+                      onChange={handleChange}
+                    />
+                    <span className="ml-2">{e.label}</span>
+                  </label>
+                ))}
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     </>
