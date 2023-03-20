@@ -2,7 +2,7 @@ import Playlists from "@/components/Playlists";
 import { useSpotifyPlaylists } from "@/hooks/useSpotifyPlaylists";
 import styles from "@/styles/Home.module.css";
 import { getProviders, signIn, signOut, useSession } from "next-auth/react";
-import { Fragment, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { cosineSim } from "@/utils/cosineSimilarity";
 import * as d3 from "d3";
 import d3Tip from "d3-tip";
@@ -15,9 +15,12 @@ export default function Home({ providers }) {
 
   useEffect(() => {
     if (focusedPlaylist.length > 0) {
+      // Clear graph
+      d3.select("#graph").html("");
       const data = getGraphData(focusedPlaylist);
-      const width = 500;
-      const height = 500;
+      console.log("data", data);
+      const width = 600;
+      const height = 600;
 
       // Create SVG
       const svg = d3
@@ -38,7 +41,6 @@ export default function Home({ providers }) {
         .html((e) => {
           return e.target.__data__.id;
         });
-
       svg.call(tip);
 
       // Initialize the links
@@ -53,7 +55,7 @@ export default function Home({ providers }) {
         .selectAll("circle")
         .data(data.nodes)
         .join("circle")
-        .attr("r", 20)
+        .attr("r", 14)
         .style("fill", "#69b3a2")
         .on("mouseover", tip.show)
         .on("mouseout", tip.hide);
@@ -70,8 +72,11 @@ export default function Home({ providers }) {
             }) // This provide  the id of a node
             .links(data.links) // and this the list of links
         )
-        .force("charge", d3.forceManyBody().strength(-400)) // This adds repulsion between nodes. Play with the -400 for the repulsion strength
-        .force("center", d3.forceCenter(width / 2, height / 2)) // This force attracts nodes to the center of the svg area
+        .force("charge", d3.forceManyBody().strength(-200)) // This adds repulsion between nodes. Play with the -400 for the repulsion strength
+        .force(
+          "center",
+          d3.forceCenter((window.innerWidth - 200) / 2, window.innerHeight / 2)
+        ) // This force attracts nodes to the center of the svg area
         .on("end", ticked);
 
       // ************* FUNCTIONS *************
@@ -142,14 +147,6 @@ export default function Home({ providers }) {
             setFocusedPlaylist={setFocusedPlaylist}
           />
           <div className="w-full">
-            {focusedPlaylist.length > 0 && (
-              <Fragment>
-                <div>Selected a playlist!</div>
-                <button onClick={() => getGraphData(focusedPlaylist)}>
-                  Calculate graphData
-                </button>
-              </Fragment>
-            )}
             <div id="graph"></div>
           </div>
         </div>
