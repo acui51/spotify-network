@@ -7,12 +7,35 @@ import { cosineSim } from "@/utils/cosineSimilarity";
 import * as d3 from "d3";
 import d3Tip from "d3-tip";
 
+const similarityTypes = [
+  { value: 'all', label: 'all' },
+  { value: 'acousticness', label: 'acousticness' },
+  { value: 'energy', label: 'energy' },
+  { value: 'instrumentalness', label: 'instrumentalness' },
+  { value: 'key', label: 'key' },
+  { value: 'liveness', label: 'liveness' },
+  { value: 'loudness', label: 'loudness' },
+  { value: 'mode', label: 'mode' },
+  { value: 'speechiness', label: 'speechiness' },
+  { value: 'tempo', label: 'tempo' },
+  { value: 'time_signature', label: 'time signature' },
+  { value: 'valence', label: 'valence' },
+];
+
 export default function Home({ providers }) {
   const { data: session, status } = useSession();
   const { data: playlistData, loading: playlistLoading } =
     useSpotifyPlaylists(session);
   const [focusedPlaylist, setFocusedPlaylist] = useState([]);
   const [selectedPlaylistName, setSelectedPlaylistName] = useState("")
+  const [similarityMetric, setSimilarityMetric] = useState("all")
+
+  const handleChange = (event) => {
+    if (controlEnabled) {
+      setSimilarityMetric(event.target.value);
+    }
+    // resetSelections();
+  };
 
   useEffect(() => {
     if (focusedPlaylist.length > 0) {
@@ -52,7 +75,7 @@ export default function Home({ providers }) {
         .data(links)
         .join("line")
         .style("stroke", "#aaa")
-        .style("stroke-width", function(d) { return ((1-d.value) * 100 * 3.5); });
+        .style("stroke-width", function (d) { return ((1 - d.value) * 100 * 3.5); });
 
       // Initialize the nodes
       const node = svg
@@ -145,7 +168,7 @@ export default function Home({ providers }) {
             </button>
           );
         })}
-        <div className = 'text-xl flex flex-row justify-center pt-3'>
+        <div className='text-xl flex flex-row justify-center pt-3'>
           Showing Similarity Graph for: {selectedPlaylistName}
         </div>
         <div className="flex">
@@ -156,6 +179,21 @@ export default function Home({ providers }) {
           />
           <div className="w-full">
             <div id="graph"></div>
+          </div>
+          <div className='bg-white border border-gray-900 bg-opacity-80 rounded-lg m-2 px-2 pb-2 pt-1 absolute right-0 bottom-0 text-lg opacity-80 flex flex-row drop-shadow-md'>
+            <div>
+              <form>
+                <div className='font-bold text-center'>
+                  Similarity Metric
+                </div>
+                {similarityTypes.map(e => (
+                  <label className='flex flex-row' key={e.value}>
+                    <input type='radio' value={e.value} checked={similarityMetric === e.value} onChange={handleChange} />
+                    <span className='ml-2'>{e.label}</span>
+                  </label>
+                ))}
+              </form>
+            </div>
           </div>
         </div>
       </div>
