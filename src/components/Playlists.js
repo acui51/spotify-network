@@ -33,7 +33,7 @@ const Playlists = ({ setSelectedPlaylistName, playlists, setFocusedPlaylist }) =
   };
 
   return (
-    <div className="flex flex-col w-72  px-3">
+    <div className="flex flex-col w-72 px-3">
       <div className='text-xl pl-1 pb-1'> Playlists </div>
       {playlists?.items &&
         playlists.items.map((playlist) => {

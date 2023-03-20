@@ -31,9 +31,7 @@ export default function Home({ providers }) {
   const [similarityMetric, setSimilarityMetric] = useState("all")
 
   const handleChange = (event) => {
-    if (controlEnabled) {
-      setSimilarityMetric(event.target.value);
-    }
+    setSimilarityMetric(event.target.value);
     // resetSelections();
   };
 
@@ -41,7 +39,7 @@ export default function Home({ providers }) {
     if (focusedPlaylist.length > 0) {
       // Clear graph
       d3.select("#graph").html("");
-      const data = getGraphData(focusedPlaylist);
+      const data = getGraphData(similarityMetric, focusedPlaylist);
       console.log("data", data);
       const width = 600;
       const height = 600;
@@ -76,6 +74,24 @@ export default function Home({ providers }) {
         .join("line")
         .style("stroke", "#aaa")
         .style("stroke-width", function (d) { return ((1 - d.value) * 100 * 3.5); });
+      if (similarityMetric === 'all') {
+        const link = svg
+          .selectAll("line")
+          .data(links)
+          .join("line")
+          .style("stroke", "#aaa")
+          .style("stroke-width", function (d) { return ((1 - d.value) * 100 * 3.5); });
+      }
+      else {
+        const link = svg
+          .selectAll("line")
+          .data(links)
+          .join("line")
+          .style("stroke", "#aaa")
+          .style("stroke-width", function (d) { return ((1 - d.value) * 100); });
+      }
+
+
 
       // Initialize the nodes
       const node = svg
@@ -148,7 +164,7 @@ export default function Home({ providers }) {
       }
       resize();
     }
-  }, [focusedPlaylist]);
+  }, [focusedPlaylist, similarityMetric]);
 
   if (status === "loading") {
     return <div>Loading...</div>;
@@ -200,7 +216,7 @@ export default function Home({ providers }) {
     </>
   );
 
-  function getGraphData(tracks) {
+  function getGraphData(similarityMetric, tracks) {
     const graphData = { nodes: [], links: [] };
     let minWeight = 1;
     let maxWeight = 0;
@@ -210,18 +226,35 @@ export default function Home({ providers }) {
       const trackFeature = tracks[i].features;
       for (let j = i + 1; j < tracks.length; j++) {
         const compTrackName = tracks[j].metadata.name;
-        const compTrackFeature = tracks[j].features;
-        const weight = cosineSim(
-          Object.values(trackFeature),
-          Object.values(compTrackFeature)
-        );
-        minWeight = Math.min(minWeight, weight);
-        maxWeight = Math.max(maxWeight, weight);
-        graphData.links.push({
-          source: trackName,
-          target: compTrackName,
-          value: weight,
-        });
+        if (similarityMetric === "all") {
+          const compTrackFeature = tracks[j].features;
+          const weight = cosineSim(
+            Object.values(trackFeature),
+            Object.values(compTrackFeature)
+          );
+          console.log("all weight", weight)
+          minWeight = Math.min(minWeight, weight);
+          maxWeight = Math.max(maxWeight, weight);
+          graphData.links.push({
+            source: trackName,
+            target: compTrackName,
+            value: weight,
+          });
+        }
+        else {
+          const trackFeature = tracks[i].features[similarityMetric];
+          const compTrackFeature = tracks[j].features[similarityMetric];
+          console.log("before calc")
+          const weight = 1 - Math.abs(trackFeature - compTrackFeature) / (trackFeature + compTrackFeature)
+          console.log("weight", weight)
+          minWeight = Math.min(minWeight, weight);
+          maxWeight = Math.max(maxWeight, weight);
+          graphData.links.push({
+            source: trackName,
+            target: compTrackName,
+            value: weight,
+          });
+        }
       }
     }
 
@@ -232,7 +265,12 @@ export default function Home({ providers }) {
     }
 
     // filter for only strong relations
-    graphData.links = graphData.links.filter((link) => link.value > 0.99);
+    if (similarityMetric === 'all') {
+      graphData.links = graphData.links.filter((link) => link.value > 0.99);
+    }
+    else {
+      graphData.links = graphData.links.filter((link) => link.value > 0.9);
+    }
 
     console.log("graphData", graphData);
     return graphData;
