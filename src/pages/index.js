@@ -35,6 +35,15 @@ export default function Home({ providers }) {
     // resetSelections();
   };
 
+  const zoom = d3
+    .zoom()
+    .scaleExtent([0.5, 5])
+    // .translateExtent([
+    //   [0, 0],
+    //   [w + 200, h + 200],
+    // ])
+    .on("zoom", handleZoom);
+
   useEffect(() => {
     if (focusedPlaylist.length > 0) {
       // Clear graph
@@ -54,18 +63,10 @@ export default function Home({ providers }) {
       const group = svg.append("g");
 
       // Initialize the zoom
-      const { height: h, width: w } = d3
-        .select("#graph")
-        .node()
-        .getBoundingClientRect();
-      const zoom = d3
-        .zoom()
-        .scaleExtent([0.5, 5])
-        .translateExtent([
-          [0, 0],
-          [w + 200, h + 200],
-        ])
-        .on("zoom", handleZoom);
+      // const { height: h, width: w } = d3
+      //   .select("#graph")
+      //   .node()
+      //   .getBoundingClientRect();
       initZoom();
 
       const xScale = d3.scaleLinear().range([0, width]);
@@ -91,25 +92,28 @@ export default function Home({ providers }) {
         .data(links)
         .join("line")
         .style("stroke", "#aaa")
-        .style("stroke-width", function (d) { return ((1 - d.value) * 100 * 3.5); });
-      if (similarityMetric === 'all') {
+        .style("stroke-width", function (d) {
+          return (1 - d.value) * 100 * 3.5;
+        });
+      if (similarityMetric === "all") {
         const link = svg
           .selectAll("line")
           .data(links)
           .join("line")
           .style("stroke", "#aaa")
-          .style("stroke-width", function (d) { return ((1 - d.value) * 100 * 3.5); });
-      }
-      else {
+          .style("stroke-width", function (d) {
+            return (1 - d.value) * 100 * 3.5;
+          });
+      } else {
         const link = svg
           .selectAll("line")
           .data(links)
           .join("line")
           .style("stroke", "#aaa")
-          .style("stroke-width", function (d) { return ((1 - d.value) * 100); });
+          .style("stroke-width", function (d) {
+            return (1 - d.value) * 100;
+          });
       }
-
-
 
       // Initialize the nodes
       const node = group
@@ -183,12 +187,6 @@ export default function Home({ providers }) {
       function initZoom() {
         d3.select("svg").call(zoom);
       }
-
-      function handleZoom(e) {
-        d3.select("svg g").attr("transform", e.transform);
-        // .attr("transform", "scale(.5, .5)");
-        // .attr("transform", "translate(100,50) scale(.5,.5)");
-      }
     }
   }, [focusedPlaylist, similarityMetric]);
 
@@ -199,6 +197,16 @@ export default function Home({ providers }) {
   return (
     <>
       <div className="h-screen">
+        <button
+          onClick={center}
+          className="absolute bottom-0"
+          style={{
+            transform: `translate(-50%, -50%)`,
+            left: "50%",
+          }}
+        >
+          Center
+        </button>
         {Object.values(providers).map((provider) => {
           return status === "unauthenticated" ? (
             <button
@@ -269,7 +277,7 @@ export default function Home({ providers }) {
             Object.values(trackFeature),
             Object.values(compTrackFeature)
           );
-          console.log("all weight", weight)
+          console.log("all weight", weight);
           minWeight = Math.min(minWeight, weight);
           maxWeight = Math.max(maxWeight, weight);
           graphData.links.push({
@@ -277,13 +285,15 @@ export default function Home({ providers }) {
             target: compTrackName,
             value: weight,
           });
-        }
-        else {
+        } else {
           const trackFeature = tracks[i].features[similarityMetric];
           const compTrackFeature = tracks[j].features[similarityMetric];
-          console.log("before calc")
-          const weight = 1 - Math.abs(trackFeature - compTrackFeature) / (trackFeature + compTrackFeature)
-          console.log("weight", weight)
+          console.log("before calc");
+          const weight =
+            1 -
+            Math.abs(trackFeature - compTrackFeature) /
+              (trackFeature + compTrackFeature);
+          console.log("weight", weight);
           minWeight = Math.min(minWeight, weight);
           maxWeight = Math.max(maxWeight, weight);
           graphData.links.push({
@@ -302,15 +312,29 @@ export default function Home({ providers }) {
     }
 
     // filter for only strong relations
-    if (similarityMetric === 'all') {
+    if (similarityMetric === "all") {
       graphData.links = graphData.links.filter((link) => link.value > 0.99);
-    }
-    else {
+    } else {
       graphData.links = graphData.links.filter((link) => link.value > 0.9);
     }
 
     console.log("graphData", graphData);
     return graphData;
+  }
+
+  function handleZoom(e) {
+    d3.select("svg g").attr("transform", e.transform);
+  }
+
+  // Centers the graph
+  function center() {
+    const { width, height } = d3
+      .select("#graph")
+      .node()
+      .getBoundingClientRect();
+    d3.select("svg")
+      .transition()
+      .call(zoom.translateTo, 0.5 * width, 0.5 * height);
   }
 }
 
