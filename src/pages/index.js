@@ -18,7 +18,6 @@ export default function Home({ providers }) {
       // Clear graph
       d3.select("#graph").html("");
       const data = getGraphData(focusedPlaylist);
-      console.log("data", data);
       const width = 600;
       const height = 600;
 
@@ -29,11 +28,25 @@ export default function Home({ providers }) {
         .attr("width", width)
         .attr("height", height);
 
+      const group = svg.append("g");
+
+      // Initialize the zoom
+      const zoom = d3
+        .zoom()
+        .scaleExtent([1, 5])
+        .translateExtent([
+          [0, 0],
+          [1000, 1000],
+        ])
+        .on("zoom", handleZoom);
+      initZoom();
+
       const xScale = d3.scaleLinear().range([0, width]);
       const yScale = d3.scaleLinear().range([height, 0]);
 
       // Add a window resize listener to make the graph responsive
       d3.select(window).on("resize", resize);
+      resize();
 
       // Tooltip
       const tip = d3Tip()
@@ -41,20 +54,22 @@ export default function Home({ providers }) {
         .html((e) => {
           return e.target.__data__.id;
         });
-      svg.call(tip);
+      group.call(tip);
 
-      var links = data.links
+      var links = data.links;
 
       // Initialize the links
-      const link = svg
+      const link = group
         .selectAll("line")
         .data(links)
         .join("line")
         .style("stroke", "#aaa")
-        .style("stroke-width", function(d) { return ((1-d.value) * 100 * 3.5); });
+        .style("stroke-width", function (d) {
+          return (1 - d.value) * 100 * 3.5;
+        });
 
       // Initialize the nodes
-      const node = svg
+      const node = group
         .selectAll("circle")
         .data(data.nodes)
         .join("circle")
@@ -113,16 +128,24 @@ export default function Home({ providers }) {
           .select("#graph")
           .node()
           .getBoundingClientRect().width;
-        const containerHeight = containerWidth * (height / width);
+        const containerHeight = d3
+          .select("#graph")
+          .node()
+          .getBoundingClientRect().height;
 
         svg.attr("width", containerWidth).attr("height", containerHeight);
 
         xScale.range([0, containerWidth]);
         yScale.range([containerHeight, 0]);
-
-        // update the positions of the nodes and links
       }
-      resize();
+
+      function initZoom() {
+        d3.select("svg").call(zoom);
+      }
+
+      function handleZoom(e) {
+        d3.select("svg g").attr("transform", e.transform);
+      }
     }
   }, [focusedPlaylist]);
 
@@ -132,14 +155,22 @@ export default function Home({ providers }) {
 
   return (
     <>
-      <div className={styles.main}>
+      <div className="h-screen">
         {Object.values(providers).map((provider) => {
           return status === "unauthenticated" ? (
-            <button key={provider.name} onClick={() => signIn()}>
+            <button
+              key={provider.name}
+              onClick={() => signIn()}
+              className="absolute top-2 right-2"
+            >
               Log in to {provider.name}
             </button>
           ) : (
-            <button key={provider.name} onClick={() => signOut()}>
+            <button
+              key={provider.name}
+              onClick={() => signOut()}
+              className="absolute top-2 right-2"
+            >
               Log out of {provider.name}
             </button>
           );
@@ -149,9 +180,7 @@ export default function Home({ providers }) {
             playlists={playlistData}
             setFocusedPlaylist={setFocusedPlaylist}
           />
-          <div className="w-full">
-            <div id="graph"></div>
-          </div>
+          <div className="w-full h-screen" id="graph"></div>
         </div>
       </div>
     </>

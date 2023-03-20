@@ -1,0 +1,140 @@
+{
+  "nodes": [
+    {
+      "id": "Get You (feat. Kali Uchis)",
+      "group": 1
+    },
+    {
+      "id": "Snooze",
+      "group": 1
+    },
+    {
+      "id": "Intentions",
+      "group": 1
+    },
+    {
+      "id": "Kill Bill",
+      "group": 1
+    },
+    {
+      "id": "Off My Face",
+      "group": 1
+    },
+    {
+      "id": "LOVE. FEAT. ZACARI.",
+      "group": 1
+    },
+    {
+      "id": "Ivy",
+      "group": 1
+    },
+    {
+      "id": "Sure Thing",
+      "group": 1
+    },
+    {
+      "id": "Die For You",
+      "group": 1
+    },
+    {
+      "id": "Power Trip (feat. Miguel)",
+      "group": 1
+    },
+    {
+      "id": "I.F.L.Y.",
+      "group": 1
+    },
+    {
+      "id": "Bound 2",
+      "group": 1
+    },
+    {
+      "id": "Violent Crimes",
+      "group": 1
+    },
+    {
+      "id": "Pursuit Of Happiness (Nightmare)",
+      "group": 1
+    },
+    {
+      "id": "RoboCop",
+      "group": 1
+    },
+    {
+      "id": "The Color Violet",
+      "group": 1
+    },
+    {
+      "id": "No Role Modelz",
+      "group": 1
+    },
+    {
+      "id": "All The Stars (with SZA)",
+      "group": 1
+    },
+    {
+      "id": "ball w/o you",
+      "group": 1
+    },
+    {
+      "id": "8TEEN",
+      "group": 1
+    },
+    {
+      "id": "Open Arms (feat. Travis Scott)",
+      "group": 1
+    }
+  ],
+  "links": [
+    {
+      "source": "Snooze",
+      "target": "RoboCop",
+      "value": 0.9979640572965692
+    },
+    {
+      "source": "Intentions",
+      "target": "ball w/o you",
+      "value": 1
+    },
+    {
+      "source": "Kill Bill",
+      "target": "All The Stars (with SZA)",
+      "value": 0.9936712633812876
+    },
+    {
+      "source": "LOVE. FEAT. ZACARI.",
+      "target": "All The Stars (with SZA)",
+      "value": 0.9975916923666653
+    },
+    {
+      "source": "Die For You",
+      "target": "Violent Crimes",
+      "value": 0.9985294848730255
+    },
+    {
+      "source": "Die For You",
+      "target": "8TEEN",
+      "value": 0.996676870610215
+    },
+    {
+      "source": "Power Trip (feat. Miguel)",
+      "target": "Violent Crimes",
+      "value": 0.9920001192323029
+    },
+    {
+      "source": "Power Trip (feat. Miguel)",
+      "target": "Pursuit Of Happiness (Nightmare)",
+      "value": 0.9969897640947449
+    },
+    {
+      "source": "I.F.L.Y.",
+      "target": "8TEEN",
+      "value": 0.9969022575803875
+    },
+    {
+      "source": "Violent Crimes",
+      "target": "8TEEN",
+      "value": 0.9964603548470666
+    }
+  ]
+}
