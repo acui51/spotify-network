@@ -199,7 +199,7 @@ export default function Home({ providers }) {
       <div className="h-screen">
         <button
           onClick={center}
-          className="absolute bottom-0"
+          className="absolute bottom-0 border-2 border-green-500 px-4 py-2 rounded-[99999px]"
           style={{
             transform: `translate(-50%, -50%)`,
             left: "50%",
