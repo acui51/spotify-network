@@ -241,6 +241,29 @@ export default function Home({ providers }) {
   return (
     <>
       <div className="h-screen">
+        {Object.values(providers).map((provider) => {
+          return status === "unauthenticated" ? (
+            <button
+              key={provider.name}
+              onClick={() => signIn()}
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+            >
+              Log in to {provider.name}
+            </button>
+          ) : (
+            <button
+              className={
+                "bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded absolute top-2 right-3"
+              }
+              key={provider.name}
+              onClick={() => signOut()}
+            >
+              Log out of {provider.name}
+            </button>
+          );
+        })}
+        {status !== "unauthenticated" ? (
+          <>
         <button
           className={
             "bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded absolute top-2 left-3"
@@ -259,28 +282,8 @@ export default function Home({ providers }) {
         >
           Center
         </button>
-        {Object.values(providers).map((provider) => {
-          return status === "unauthenticated" ? (
-            <button
-              key={provider.name}
-              onClick={() => signIn()}
-              className="absolute top-2 right-2"
-            >
-              Log in to {provider.name}
-            </button>
-          ) : (
-            <button
-              className={
-                "bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded absolute top-2 right-3"
-              }
-              key={provider.name}
-              onClick={() => signOut()}
-            >
-              Log out of {provider.name}
-            </button>
-          );
-        })}
-         <OnboardModal
+
+        <OnboardModal
           visible={isOnboardModalVisible}
           onCancel={() => {
             setIsModalVisible(false);
@@ -441,7 +444,8 @@ export default function Home({ providers }) {
               </form>
             </div> */}
           </div>
-        </div>
+        </div> 
+        </>) : null }
       </div>
     </>
   );
