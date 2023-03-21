@@ -127,7 +127,8 @@ export default function Home({ providers }) {
           .join("line")
           .style("stroke", "#aaa")
           .style("stroke-width", function (d) {
-            return (1 - d.value) * 100;
+            console.log(d.value)
+            return ((d.value-.9)/.9) * 10;
           });
       }
 
@@ -345,7 +346,7 @@ export default function Home({ providers }) {
     if (similarityMetric === "all") {
       graphData.links = graphData.links.filter((link) => link.value > 0.99);
     } else {
-      graphData.links = graphData.links.filter((link) => link.value > 0.9);
+      graphData.links = graphData.links.filter((link) => link.value > 0.95);
     }
 
     console.log("graphData", graphData);
