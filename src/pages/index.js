@@ -1,4 +1,5 @@
 import Playlists from "@/components/Playlists";
+import OnboardModal from "@/components/OnboardModal"
 import { useSpotifyPlaylists } from "@/hooks/useSpotifyPlaylists";
 import { getProviders, signIn, signOut, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
@@ -20,6 +21,7 @@ export default function Home({ providers }) {
     useSpotifyPlaylists(session);
   const [focusedPlaylist, setFocusedPlaylist] = useState([]);
   const [selectedPlaylistName, setSelectedPlaylistName] = useState("");
+  const [isOnboardModalVisible, setIsOnboardModalVisible] = useState(true);
 
   const [selectedMetrics, setSelectedMetrics] = useState({
     acousticness: false,
@@ -240,6 +242,14 @@ export default function Home({ providers }) {
     <>
       <div className="h-screen">
         <button
+          className={
+            "bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded absolute top-2 left-3"
+          }
+          onClick={() => console.log("modal")}
+        >
+          About This Tool
+        </button>
+        <button
           onClick={center}
           className="absolute bottom-0 border-2 border-green-500 px-4 py-2 rounded-[99999px]"
           style={{
@@ -270,6 +280,15 @@ export default function Home({ providers }) {
             </button>
           );
         })}
+         <OnboardModal
+          visible={isOnboardModalVisible}
+          onCancel={() => {
+            setIsModalVisible(false);
+          }}
+          onOkay={() => {
+            setIsModalVisible(false);
+          }}
+        />
         <div className="text-xl flex flex-row justify-center pt-3">
           Showing Similarity Graph for: {selectedPlaylistName}
         </div>
