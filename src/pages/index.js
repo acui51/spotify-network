@@ -254,7 +254,9 @@ export default function Home({ providers }) {
             <button
               key={provider.name}
               onClick={() => signIn()}
-              className="absolute top-2 right-2"
+              className={
+                "bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded absolute top-2 right-3"
+              }
             >
               Log in to {provider.name}
             </button>
