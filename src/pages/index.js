@@ -6,21 +6,15 @@ import { useState, useEffect } from "react";
 import { cosineSim } from "@/utils/cosineSimilarity";
 import * as d3 from "d3";
 import d3Tip from "d3-tip";
-
-const similarityTypes = [
-  { value: "all", label: "all" },
-  { value: "acousticness", label: "acousticness" },
-  { value: "energy", label: "energy" },
-  { value: "instrumentalness", label: "instrumentalness" },
-  { value: "key", label: "key" },
-  { value: "liveness", label: "liveness" },
-  { value: "loudness", label: "loudness" },
-  { value: "mode", label: "mode" },
-  { value: "speechiness", label: "speechiness" },
-  { value: "tempo", label: "tempo" },
-  { value: "time_signature", label: "time signature" },
-  { value: "valence", label: "valence" },
-];
+import Box from '@mui/material/Box';
+import FormLabel from '@mui/material/FormLabel';
+import FormControl from '@mui/material/FormControl';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormHelperText from '@mui/material/FormHelperText';
+import Checkbox from '@mui/material/Checkbox';
+import Button from '@mui/material/Button';
+import * as React from 'react';
 
 export default function Home({ providers }) {
   const { data: session, status } = useSession();
@@ -28,11 +22,36 @@ export default function Home({ providers }) {
     useSpotifyPlaylists(session);
   const [focusedPlaylist, setFocusedPlaylist] = useState([]);
   const [selectedPlaylistName, setSelectedPlaylistName] = useState("");
-  const [similarityMetric, setSimilarityMetric] = useState("all");
+  const [buttonPressed, setButtonPressed] = useState(false)
+  const [metrics, setMetrics] = useState([])
+  const [state, setState] = React.useState({
+    acousticness: false,
+    energy: false,
+    instrumentalness: false,
+    key: false,
+    liveness: false,
+    loudness: false,
+    mode: false,
+    speechiness: false,
+    tempo: false,
+    time_signature: false,
+    valence: false,
+  });
+  const {acousticness, energy, instrumentalness, key,
+    liveness, loudness, mode, speechiness, tempo, time_signature, valence } = state;
 
   const handleChange = (event) => {
-    setSimilarityMetric(event.target.value);
-    // resetSelections();
+    setState({
+      ...state,
+      [event.target.name]: event.target.checked,
+    });
+    if (!metrics.includes(event.target.name)) {
+      setMetrics(metrics => [...metrics, event.target.name])
+    }
+    console.log("metrics", metrics)
+  };
+  const handlePress = () => {
+    setButtonPressed(!buttonPressed)
   };
 
   const zoom = d3
@@ -48,7 +67,7 @@ export default function Home({ providers }) {
     if (focusedPlaylist.length > 0) {
       // Clear graph
       d3.select("#graph").html("");
-      const data = getGraphData(similarityMetric, focusedPlaylist);
+      const data = getGraphData(metrics, focusedPlaylist);
       console.log("data", data);
       const width = 600;
       const height = 600;
@@ -111,7 +130,7 @@ export default function Home({ providers }) {
         .style("stroke-width", function (d) {
           return (1 - d.value) * 100 * 3.5;
         });
-      if (similarityMetric === "all") {
+      if (metrics.length === 11) {
         const link = svg
           .selectAll("line")
           .data(links)
@@ -128,7 +147,7 @@ export default function Home({ providers }) {
           .style("stroke", "#aaa")
           .style("stroke-width", function (d) {
             console.log(d.value)
-            return ((d.value-.9)/.9) * 10;
+            return ((d.value - .9) / .9) * 10;
           });
       }
 
@@ -216,7 +235,7 @@ export default function Home({ providers }) {
         d3.select("svg").call(zoom);
       }
     }
-  }, [focusedPlaylist, similarityMetric]);
+  }, [focusedPlaylist, metrics, buttonPressed]);
 
   if (status === "loading") {
     return <div>Loading...</div>;
@@ -267,7 +286,81 @@ export default function Home({ providers }) {
           />
           <div className="w-full h-screen overflow-y-scroll" id="graph"></div>
           <div className="bg-white border border-gray-900 bg-opacity-80 rounded-lg m-2 px-2 pb-2 pt-1 absolute right-0 bottom-0 text-lg opacity-80 flex flex-row drop-shadow-md">
-            <div>
+            <Box sx={{ display: 'flex' }}>
+              <FormControl sx={{ m: 1 }} component="fieldset" variant="standard">
+                <FormLabel component="legend">Choose Similarity Metrics</FormLabel>
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Checkbox checked={acousticness} onChange={handleChange} name="acousticness" />
+                    }
+                    label="acousticness"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox checked={energy} onChange={handleChange} name="energy" />
+                    }
+                    label="energy"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox checked={instrumentalness} onChange={handleChange} name="instrumentalness" />
+                    }
+                    label="instrumentalness"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox checked={key} onChange={handleChange} name="key" />
+                    }
+                    label="key"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox checked={liveness} onChange={handleChange} name="liveness" />
+                    }
+                    label="liveness"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox checked={loudness} onChange={handleChange} name="loudness" />
+                    }
+                    label="loudness"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox checked={mode} onChange={handleChange} name="mode" />
+                    }
+                    label="mode"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox checked={speechiness} onChange={handleChange} name="speechiness" />
+                    }
+                    label="speechiness"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox checked={tempo} onChange={handleChange} name="tempo" />
+                    }
+                    label="tempo"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox checked={time_signature} onChange={handleChange} name="time_signature" />
+                    }
+                    label="time_signature"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox checked={valence} onChange={handleChange} name="valence" />
+                    }
+                    label="valence"
+                  />
+                  <Button onChange={handlePress}>Graph!</Button>
+                </FormGroup>
+              </FormControl>
+            </Box>
+            {/* <div> OLD FORM
               <form>
                 <div className="font-bold text-center">Similarity Metric</div>
                 {similarityTypes.map((e) => (
@@ -282,14 +375,14 @@ export default function Home({ providers }) {
                   </label>
                 ))}
               </form>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
     </>
   );
 
-  function getGraphData(similarityMetric, tracks) {
+  function getGraphData(metrics, tracks) {
     const graphData = { nodes: [], links: [] };
     let minWeight = 1;
     let maxWeight = 0;
@@ -301,38 +394,29 @@ export default function Home({ providers }) {
         group: 1,
         img_url: tracks[i].metadata.album.images?.[0].url,
       });
-      const trackFeature = tracks[i].features;
+      // const trackFeature = tracks[i].features;
+      const trackFeature = [];
+      const compTrackFeature = [];
+      // const compTrackFeature = tracks[j].features;
+      for (let n = 0; n < metrics.length; n++) {
+        trackFeature.push(tracks[i].features[metrics[n]])
+      }
       for (let j = i + 1; j < tracks.length; j++) {
         const compTrackName = tracks[j].metadata.name;
-        if (similarityMetric === "all") {
-          const compTrackFeature = tracks[j].features;
-          const weight = cosineSim(
-            Object.values(trackFeature),
-            Object.values(compTrackFeature)
-          );
-          minWeight = Math.min(minWeight, weight);
-          maxWeight = Math.max(maxWeight, weight);
-          graphData.links.push({
-            source: trackName,
-            target: compTrackName,
-            value: weight,
-          });
-        } else {
-          const trackFeature = tracks[i].features[similarityMetric];
-          const compTrackFeature = tracks[j].features[similarityMetric];
-          const weight =
-            1 -
-            Math.abs(trackFeature - compTrackFeature) /
-              (trackFeature + compTrackFeature);
-          console.log("weight", weight);
-          minWeight = Math.min(minWeight, weight);
-          maxWeight = Math.max(maxWeight, weight);
-          graphData.links.push({
-            source: trackName,
-            target: compTrackName,
-            value: weight,
-          });
+        for (let n = 0; n < metrics.length; n++) {
+          compTrackFeature.push(tracks[j].features[metrics[n]])
         }
+        const weight = cosineSim(
+          trackFeature,
+          compTrackFeature
+        );
+        minWeight = Math.min(minWeight, weight);
+        maxWeight = Math.max(maxWeight, weight);
+        graphData.links.push({
+          source: trackName,
+          target: compTrackName,
+          value: weight,
+        });
       }
     }
 
@@ -343,7 +427,7 @@ export default function Home({ providers }) {
     }
 
     // filter for only strong relations
-    if (similarityMetric === "all") {
+    if (metrics.length === 11) {
       graphData.links = graphData.links.filter((link) => link.value > 0.99);
     } else {
       graphData.links = graphData.links.filter((link) => link.value > 0.95);
