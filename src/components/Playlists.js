@@ -11,7 +11,7 @@ const Playlists = ({
     const features = await Promise.all(
       items.map((item) => axios.get(`/api/features/${item.track.id}`))
     );
-    console.log("playlists", playlists)
+    console.log("playlists", playlists);
 
     const transformedFeatures = features.map(({ data }) => {
       const trackItem = items.find((item) => data.id === item.track.id);
@@ -39,7 +39,7 @@ const Playlists = ({
 
   return (
     <div className="flex flex-col w-84 px-3 h-screen overflow-y-scroll border-x-gray border-x-2">
-      <div className='text-xl pl-1 pb-1'> Playlists </div>
+      <div className="text-xl pl-1 pb-1"> Playlists </div>
 
       {playlists?.items &&
         playlists.items.map((playlist) => {
@@ -52,12 +52,14 @@ const Playlists = ({
               key={playlist.id}
               className="cursor-pointer"
             >
-              <div className='flex flex-row text-left items-center mt-1'>
-                <span className='flex flex-row'>
-                <img className='w-12 h-12' src={playlist.images[0]['url']}></img>
+              <div className="flex flex-row text-left items-center mt-1">
+                <span className="flex flex-row">
+                  <img
+                    className="w-12 h-12"
+                    src={playlist.images?.[0]?.["url"]}
+                  ></img>
                 </span>
-                <span className='pl-2 text-m'> {playlist.name}</span>
-
+                <span className="pl-2 text-m"> {playlist.name}</span>
               </div>
               <div className="pt-2"></div>
             </div>

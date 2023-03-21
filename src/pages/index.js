@@ -115,15 +115,26 @@ export default function Home({ providers }) {
           });
       }
 
-      // Initialize the nodes
+      // Initialize the nodes with images
       const node = group
-        .selectAll("circle")
+        .selectAll("image")
         .data(data.nodes)
-        .join("circle")
-        .attr("r", 14)
-        .style("fill", "#69b3a2")
+        .join("image")
+        .attr("xlink:href", (d) => d.img_url)
+        .attr("width", 32)
+        .attr("height", 32)
+        .attr("clip-path", "inset(0% round 15px)")
         .on("mouseover", tip.show)
         .on("mouseout", tip.hide);
+
+      // const node = group
+      //   .selectAll("circle")
+      //   .data(data.nodes)
+      //   .join("circle")
+      //   .attr("r", 14)
+      //   .style("fill", "#69b3a2")
+      //   .on("mouseover", tip.show)
+      //   .on("mouseout", tip.hide);
 
       // Let's list the force we wanna apply on the network
       const simulation = d3
@@ -162,10 +173,10 @@ export default function Home({ providers }) {
           });
 
         node
-          .attr("cx", function (d) {
-            return d.x + 6;
+          .attr("x", function (d) {
+            return d.x - 16;
           })
-          .attr("cy", function (d) {
+          .attr("y", function (d) {
             return d.y - 6;
           });
       }
@@ -267,7 +278,12 @@ export default function Home({ providers }) {
     let maxWeight = 0;
     for (let i = 0; i < tracks.length; i++) {
       const trackName = tracks[i].metadata.name;
-      graphData.nodes.push({ id: trackName, group: 1 });
+      console.log(tracks[i].metadata);
+      graphData.nodes.push({
+        id: trackName,
+        group: 1,
+        img_url: tracks[i].metadata.album.images?.[0].url,
+      });
       const trackFeature = tracks[i].features;
       for (let j = i + 1; j < tracks.length; j++) {
         const compTrackName = tracks[j].metadata.name;
