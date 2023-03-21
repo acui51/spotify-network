@@ -79,8 +79,24 @@ export default function Home({ providers }) {
       // Tooltip
       const tip = d3Tip()
         .attr("class", "d3-tip")
+        .style("position", "fixed")
+        .style("text-align", "left")
+        .style("padding", "5px")
+        .style("font", "12px sans-serif")
+        .style("background", "white")
+        .style("opacity", "0.5")
+        .style("border", "1px solid gray")
+        .style("border-radius", "10px")
+        .style("z-index", "10")
         .html((e) => {
-          return e.target.__data__.id;
+          console.log("e", e);
+          return (
+            "Track Name: " +
+            e.target.__data__.id +
+            "<br><br>" +
+            "Artist: " +
+            e.target.__data__.artist
+          );
         });
       group.call(tip);
 
@@ -248,7 +264,7 @@ export default function Home({ providers }) {
             setSelectedPlaylistName={setSelectedPlaylistName}
             setFocusedPlaylist={setFocusedPlaylist}
           />
-          <div className="w-full" id="graph"></div>
+          <div className="w-full h-screen overflow-y-scroll" id="graph"></div>
           <div className="bg-white border border-gray-900 bg-opacity-80 rounded-lg m-2 px-2 pb-2 pt-1 absolute right-0 bottom-0 text-lg opacity-80 flex flex-row drop-shadow-md">
             <div>
               <form>
@@ -278,9 +294,9 @@ export default function Home({ providers }) {
     let maxWeight = 0;
     for (let i = 0; i < tracks.length; i++) {
       const trackName = tracks[i].metadata.name;
-      console.log(tracks[i].metadata);
       graphData.nodes.push({
         id: trackName,
+        artist: tracks[i].metadata.artists[0]["name"],
         group: 1,
         img_url: tracks[i].metadata.album.images?.[0].url,
       });
