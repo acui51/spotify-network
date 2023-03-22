@@ -1,6 +1,6 @@
 import Playlists from "@/components/Playlists";
-import OnboardModal from "@/components/OnboardModal"
-import AboutPage from "@/components/AboutPage"
+import OnboardModal from "@/components/OnboardModal";
+import AboutModal from "@/components/AboutModal";
 import { useSpotifyPlaylists } from "@/hooks/useSpotifyPlaylists";
 import { getProviders, signIn, signOut, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
@@ -23,7 +23,7 @@ export default function Home({ providers }) {
   const [focusedPlaylist, setFocusedPlaylist] = useState([]);
   const [selectedPlaylistName, setSelectedPlaylistName] = useState("");
   const [isOnboardModalVisible, setIsOnboardModalVisible] = useState(true);
-  const [isAboutPageVisible, setIsAboutPageVisible] = useState(false);
+  const [isAboutModalVisible, setAboutModalVisible] = useState(false);
 
   const [selectedMetrics, setSelectedMetrics] = useState({
     acousticness: false,
@@ -248,7 +248,9 @@ export default function Home({ providers }) {
             <button
               key={provider.name}
               onClick={() => signIn()}
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+              className={
+                "bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded absolute top-2 right-3"
+              }
             >
               Log in to {provider.name}
             </button>
@@ -268,11 +270,15 @@ export default function Home({ providers }) {
           <>
             <button
               className={
-                "bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded absolute top-2 left-3"}
-              onClick={() => console.log("about page")}
+                "bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded absolute top-2 left-3"
+              }
+              onClick={() => {
+                setAboutModalVisible(true);
+              }}
             >
               About This Tool
             </button>
+            {isAboutModalVisible && <AboutModal visible={setAboutModalVisible}/>}
             <button
               onClick={center}
               className="absolute bottom-0 border-2 border-green-500 px-4 py-2 rounded-[99999px]"
@@ -302,7 +308,10 @@ export default function Home({ providers }) {
                 setSelectedPlaylistName={setSelectedPlaylistName}
                 setFocusedPlaylist={setFocusedPlaylist}
               />
-              <div className="w-full h-screen overflow-y-scroll" id="graph"></div>
+              <div
+                className="w-full h-screen overflow-y-scroll"
+                id="graph"
+              ></div>
               <div className="bg-white border border-gray-900 bg-opacity-80 rounded-lg m-2 px-2 pb-2 pt-1 absolute right-0 bottom-0 text-lg opacity-80 flex flex-row drop-shadow-md">
                 <Box sx={{ display: "flex" }}>
                   <FormControl
@@ -446,7 +455,8 @@ export default function Home({ providers }) {
             </div> */}
               </div>
             </div>
-          </>) : null}
+          </>
+        ) : null}
       </div>
     </>
   );
