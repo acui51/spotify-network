@@ -1,6 +1,37 @@
 import NextAuth from "next-auth";
 import SpotifyProvider from "next-auth/providers/spotify";
 
+async function refreshAccessToken(token) {
+  try {
+    // Get refreshed access token
+    const res = await fetch("https://accounts.spotify.com/api/token", {
+      method: "POST",
+      body:
+        "grant_type=refresh_token&refresh_token=" +
+        token.refreshToken +
+        "&client_id=" +
+        process.env.SPOTIFY_API_CLIENT_ID +
+        "&client_secret=" +
+        process.env.SPOTIFY_API_CLIENT_SECRET,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
+
+    const resJson = await res.json();
+    return {
+      ...token,
+      accessToken: resJson.access_token,
+      accessTokenExpires: Date.now() + resJson.expires_in * 1000,
+    };
+  } catch (error) {
+    return {
+      ...token,
+      error: "RefreshAccessTokenError",
+    };
+  }
+}
+
 export const authOptions = {
   providers: [
     SpotifyProvider({
@@ -22,7 +53,14 @@ export const authOptions = {
           accessTokenExpires: account.expires_at * 1000,
         };
       }
-      return token;
+
+      // Return previous token if the access token hasn't expired yet
+      if (Date.now() < token.accessTokenExpires) {
+        return token;
+      }
+
+      // Access token has expired, refresh
+      return await refreshAccessToken(token);
     },
     async session({ session, token }) {
       if (token.accessToken) {
