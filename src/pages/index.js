@@ -154,17 +154,10 @@ export default function Home({ providers }) {
       .attr("width", 32)
       .attr("height", 32)
       .attr("clip-path", "inset(0% round 15px)")
+      .style("outline", "3px solid black")
+      .style("border-radius", "50%")
       .on("mouseover", tip.show)
       .on("mouseout", tip.hide);
-
-    // const node = group
-    //   .selectAll("circle")
-    //   .data(data.nodes)
-    //   .join("circle")
-    //   .attr("r", 14)
-    //   .style("fill", "#69b3a2")
-    //   .on("mouseover", tip.show)
-    //   .on("mouseout", tip.hide);
 
     // Let's list the force we wanna apply on the network
     const simulation = d3
@@ -278,7 +271,9 @@ export default function Home({ providers }) {
             >
               About This Tool
             </button>
-            {isAboutModalVisible && <AboutModal visible={setAboutModalVisible}/>}
+            {isAboutModalVisible && (
+              <AboutModal visible={setAboutModalVisible} />
+            )}
             <button
               onClick={center}
               className="absolute bottom-0 border-2 border-green-500 px-4 py-2 rounded-[99999px]"
@@ -471,7 +466,7 @@ export default function Home({ providers }) {
         id: trackName,
         artist: tracks[i].metadata.artists[0]["name"],
         group: 1,
-        img_url: tracks[i].metadata.album.images?.[0].url,
+        img_url: tracks[i].metadata.album.images?.[0]?.url,
       });
       const trackFeature = [];
       for (let key of Object.keys(selectedMetrics)) {
