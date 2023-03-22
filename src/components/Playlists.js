@@ -39,7 +39,7 @@ const Playlists = ({
 
   return (
     <div className="flex flex-col w-84 px-3 h-screen overflow-y-scroll border-x-gray border-x-2">
-      <div className="text-xl pl-1 pb-1"> Playlists </div>
+      <div className="text-xl pl-1 py-1"> Playlists </div>
 
       {playlists?.items &&
         playlists.items.map((playlist) => {
