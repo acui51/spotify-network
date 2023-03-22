@@ -1,5 +1,6 @@
 import Playlists from "@/components/Playlists";
-import OnboardModal from "@/components/OnboardModal"
+import OnboardModal from "@/components/OnboardModal";
+import AboutModal from "@/components/AboutModal";
 import { useSpotifyPlaylists } from "@/hooks/useSpotifyPlaylists";
 import { getProviders, signIn, signOut, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
@@ -22,6 +23,7 @@ export default function Home({ providers }) {
   const [focusedPlaylist, setFocusedPlaylist] = useState([]);
   const [selectedPlaylistName, setSelectedPlaylistName] = useState("");
   const [isOnboardModalVisible, setIsOnboardModalVisible] = useState(true);
+  const [isAboutModalVisible, setAboutModalVisible] = useState(false);
 
   const [selectedMetrics, setSelectedMetrics] = useState({
     acousticness: false,
@@ -264,170 +266,176 @@ export default function Home({ providers }) {
         })}
         {status !== "unauthenticated" ? (
           <>
-        <button
-          className={
-            "bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded absolute top-2 left-3"
-          }
-          onClick={() => console.log("modal")}
-        >
-          About This Tool
-        </button>
-        <button
-          onClick={center}
-          className="absolute bottom-0 border-2 border-green-500 px-4 py-2 rounded-[99999px]"
-          style={{
-            transform: `translate(-50%, -50%)`,
-            left: "50%",
-          }}
-        >
-          Center
-        </button>
+            <button
+              className={
+                "bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded absolute top-2 left-3"
+              }
+              onClick={() => {
+                setAboutModalVisible(true);
+              }}
+            >
+              About This Tool
+            </button>
+            {isAboutModalVisible && <AboutModal visible={setAboutModalVisible}/>}
+            <button
+              onClick={center}
+              className="absolute bottom-0 border-2 border-green-500 px-4 py-2 rounded-[99999px]"
+              style={{
+                transform: `translate(-50%, -50%)`,
+                left: "50%",
+              }}
+            >
+              Center
+            </button>
 
-        <OnboardModal
-          visible={isOnboardModalVisible}
-          onCancel={() => {
-            setIsModalVisible(false);
-          }}
-          onOkay={() => {
-            setIsModalVisible(false);
-          }}
-        />
-        <div className="text-xl flex flex-row justify-center pt-3">
-          Showing Similarity Graph for: {selectedPlaylistName}
-        </div>
-        <div className="flex">
-          <Playlists
-            playlists={playlistData}
-            setSelectedPlaylistName={setSelectedPlaylistName}
-            setFocusedPlaylist={setFocusedPlaylist}
-          />
-          <div className="w-full h-screen overflow-y-scroll" id="graph"></div>
-          <div className="bg-white border border-gray-900 bg-opacity-80 rounded-lg m-2 px-2 pb-2 pt-1 absolute right-0 bottom-0 text-lg opacity-80 flex flex-row drop-shadow-md">
-            <Box sx={{ display: "flex" }}>
-              <FormControl
-                sx={{ m: 1 }}
-                component="fieldset"
-                variant="standard"
-              >
-                <FormLabel component="legend">
-                  Choose Similarity Metrics
-                </FormLabel>
-                <FormGroup>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={selectedMetrics.acousticness}
-                        onChange={handleChange}
-                        name="acousticness"
+            <OnboardModal
+              visible={isOnboardModalVisible}
+              onCancel={() => {
+                setIsModalVisible(false);
+              }}
+              onOkay={() => {
+                setIsModalVisible(false);
+              }}
+            />
+            <div className="text-xl flex flex-row justify-center pt-3">
+              Showing Similarity Graph for: {selectedPlaylistName}
+            </div>
+            <div className="flex">
+              <Playlists
+                playlists={playlistData}
+                setSelectedPlaylistName={setSelectedPlaylistName}
+                setFocusedPlaylist={setFocusedPlaylist}
+              />
+              <div
+                className="w-full h-screen overflow-y-scroll"
+                id="graph"
+              ></div>
+              <div className="bg-white border border-gray-900 bg-opacity-80 rounded-lg m-2 px-2 pb-2 pt-1 absolute right-0 bottom-0 text-lg opacity-80 flex flex-row drop-shadow-md">
+                <Box sx={{ display: "flex" }}>
+                  <FormControl
+                    sx={{ m: 1 }}
+                    component="fieldset"
+                    variant="standard"
+                  >
+                    <FormLabel component="legend">
+                      Choose Similarity Metrics
+                    </FormLabel>
+                    <FormGroup>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.acousticness}
+                            onChange={handleChange}
+                            name="acousticness"
+                          />
+                        }
+                        label="acousticness"
                       />
-                    }
-                    label="acousticness"
-                  />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={selectedMetrics.energy}
-                        onChange={handleChange}
-                        name="energy"
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.energy}
+                            onChange={handleChange}
+                            name="energy"
+                          />
+                        }
+                        label="energy"
                       />
-                    }
-                    label="energy"
-                  />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={selectedMetrics.instrumentalness}
-                        onChange={handleChange}
-                        name="instrumentalness"
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.instrumentalness}
+                            onChange={handleChange}
+                            name="instrumentalness"
+                          />
+                        }
+                        label="instrumentalness"
                       />
-                    }
-                    label="instrumentalness"
-                  />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={selectedMetrics.key}
-                        onChange={handleChange}
-                        name="key"
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.key}
+                            onChange={handleChange}
+                            name="key"
+                          />
+                        }
+                        label="key"
                       />
-                    }
-                    label="key"
-                  />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={selectedMetrics.liveness}
-                        onChange={handleChange}
-                        name="liveness"
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.liveness}
+                            onChange={handleChange}
+                            name="liveness"
+                          />
+                        }
+                        label="liveness"
                       />
-                    }
-                    label="liveness"
-                  />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={selectedMetrics.loudness}
-                        onChange={handleChange}
-                        name="loudness"
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.loudness}
+                            onChange={handleChange}
+                            name="loudness"
+                          />
+                        }
+                        label="loudness"
                       />
-                    }
-                    label="loudness"
-                  />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={selectedMetrics.mode}
-                        onChange={handleChange}
-                        name="mode"
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.mode}
+                            onChange={handleChange}
+                            name="mode"
+                          />
+                        }
+                        label="mode"
                       />
-                    }
-                    label="mode"
-                  />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={selectedMetrics.speechiness}
-                        onChange={handleChange}
-                        name="speechiness"
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.speechiness}
+                            onChange={handleChange}
+                            name="speechiness"
+                          />
+                        }
+                        label="speechiness"
                       />
-                    }
-                    label="speechiness"
-                  />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={selectedMetrics.tempo}
-                        onChange={handleChange}
-                        name="tempo"
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.tempo}
+                            onChange={handleChange}
+                            name="tempo"
+                          />
+                        }
+                        label="tempo"
                       />
-                    }
-                    label="tempo"
-                  />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={selectedMetrics.time_signature}
-                        onChange={handleChange}
-                        name="time_signature"
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.time_signature}
+                            onChange={handleChange}
+                            name="time_signature"
+                          />
+                        }
+                        label="time_signature"
                       />
-                    }
-                    label="time_signature"
-                  />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={selectedMetrics.valence}
-                        onChange={handleChange}
-                        name="valence"
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.valence}
+                            onChange={handleChange}
+                            name="valence"
+                          />
+                        }
+                        label="valence"
                       />
-                    }
-                    label="valence"
-                  />
-                  <Button onClick={drawGraph}>Graph!</Button>
-                </FormGroup>
-              </FormControl>
-            </Box>
-            {/* <div> OLD FORM
+                      <Button onClick={drawGraph}>Graph!</Button>
+                    </FormGroup>
+                  </FormControl>
+                </Box>
+                {/* <div> OLD FORM
               <form>
                 <div className="font-bold text-center">Similarity Metric</div>
                 {similarityTypes.map((e) => (
@@ -443,9 +451,10 @@ export default function Home({ providers }) {
                 ))}
               </form>
             </div> */}
-          </div>
-        </div> 
-        </>) : null }
+              </div>
+            </div>
+          </>
+        ) : null}
       </div>
     </>
   );
