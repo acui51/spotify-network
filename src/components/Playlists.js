@@ -12,6 +12,19 @@ const Playlists = ({
       items.map((item) => axios.get(`/api/features/${item.track.id}`))
     );
 
+    // attempt to get artist image but dont know how to put it into meta data
+    // const artistInfo = await Promise.all(
+    //   items.map((item) => axios.get(`/api/artists/${item.track.artists[0].id}`))
+    // );
+    // const artists = artistInfo.map(({data}) => {
+    //   return {
+    //     track_id: data.track.id,
+    //     artist_img: data.images[0].url,
+    //   }
+    // })
+    // console.log("artists", artists)
+    // console.log("artistInfo", artistInfo);
+
     const transformedFeatures = features.map(({ data }) => {
       const trackItem = items.find((item) => data.id === item.track.id);
       return {
@@ -32,7 +45,6 @@ const Playlists = ({
         },
       };
     });
-
     setFocusedPlaylist(transformedFeatures);
   };
 
@@ -60,7 +72,6 @@ const Playlists = ({
                 </span>
                 <span className="pl-2 text-m"> {playlist.name}</span>
               </div>
-              <div className="pt-2"></div>
             </div>
           );
         })}
