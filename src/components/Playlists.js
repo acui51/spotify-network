@@ -8,27 +8,34 @@ const Playlists = ({
   const fetchTrackFeatures = async (id) => {
     const { data } = await axios.get(`/api/playlists/${id}`);
     const items = data.items;
+    
     const features = await Promise.all(
       items.map((item) => axios.get(`/api/features/${item.track.id}`))
     );
 
     // attempt to get artist image but dont know how to put it into meta data
-    // const artistInfo = await Promise.all(
-    //   items.map((item) => axios.get(`/api/artists/${item.track.artists[0].id}`))
-    // );
-    // const artists = artistInfo.map(({data}) => {
-    //   return {
-    //     track_id: data.track.id,
-    //     artist_img: data.images[0].url,
-    //   }
-    // })
-    // console.log("artists", artists)
-    // console.log("artistInfo", artistInfo);
+    
+    // const artistTemp = []
+    // for( var i = 0; i < items.length; i++){
+    //   artistTemp.push(items[i].track.artists)
+    // }
+    // console.log("artistTemp", artistTemp);
+
+    const artistInfo = await Promise.all(
+      items.flatMap((item) => item.track.artists.map((elem) => axios.get(`/api/artists/${elem.id}`)))
+    );
+    
+    const artists = artistInfo.map(({data}) => {
+      return {
+        artist_name: data.name,
+        artist_img: data.images[0].url,
+      }
+    })
 
     const transformedFeatures = features.map(({ data }) => {
       const trackItem = items.find((item) => data.id === item.track.id);
       return {
-        metadata: trackItem?.track,
+        metadata: {...trackItem?.track, artist_info: artists},
         features: {
           acousticness: data.acousticness,
           danceability: data.danceability,
@@ -45,6 +52,7 @@ const Playlists = ({
         },
       };
     });
+    console.log("transformedFeatures", transformedFeatures);
     setFocusedPlaylist(transformedFeatures);
   };
 

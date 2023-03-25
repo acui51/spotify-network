@@ -25,7 +25,7 @@ export default function Home({ providers }) {
   const [selectedPlaylistName, setSelectedPlaylistName] = useState("");
   const [isOnboardModalVisible, setIsOnboardModalVisible] = useState(true);
   const [isAboutModalVisible, setAboutModalVisible] = useState(false);
-  const [classify, setClassify] = useState(false);
+  const [classify, setClassify] = useState(null);
   const [selectedMetrics, setSelectedMetrics] = useState({
     acousticness: false,
     energy: false,
@@ -58,7 +58,7 @@ export default function Home({ providers }) {
     // ])
     .on("zoom", handleZoom);
 
-  const drawGraph = (classify) => {
+  const drawGraph = () => {
     // Clear graph
     d3.select("#graph").html("");
     const data = classify
@@ -351,10 +351,19 @@ export default function Home({ providers }) {
                       </FormLabel>
                       <RadioGroup
                         value={classify}
-                        onChange={() => setClassify("artists")}
+                        onChange={() => {
+                          setClassify(true);
+                          setSelectedMetrics({
+                            ...selectedMetrics,
+                            [event.target.name]: false,
+                          });
+                        }}
                       >
-                        <FormControlLabel control={<Radio />} label="artists" />
-                        <FormControlLabel control={<Radio />} label="genres" />
+                        <FormControlLabel
+                          control={<Radio checked={classify === true} />}
+                          label="artists"
+                        />
+                        {/* <FormControlLabel control={<Radio checked={classify === false}/>} label="genres" /> */}
                         <Button onClick={drawGraph}>Graph!</Button>
                       </RadioGroup>
                     </FormControl>
@@ -544,11 +553,13 @@ export default function Home({ providers }) {
 
     // filter for only strong relations
     graphData.links = graphData.links.filter((link) => link.value > 0.99);
-
     console.log("graphData", graphData);
     return graphData;
   }
 
+  function artist_img_url(artistName) {
+    return tracks;
+  }
   function getClassifyGraphData(tracks) {
     const graphClassifyData = { nodes: [], links: [] };
     const artistSet = new Set();
@@ -574,8 +585,9 @@ export default function Home({ providers }) {
             graphClassifyData.nodes.push({
               id: artistName,
               group: 2,
-              img_url:
-                "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Location_dot_black.svg/800px-Location_dot_black.svg.png",
+              img_url: tracks[i].metadata.artist_info.find(
+                ({ artist_name }) => artist_name === artistName
+              ).artist_img,
             });
           }
           artistSet.add(artistName);
@@ -603,7 +615,7 @@ export default function Home({ providers }) {
         });
       }
     }
-    // console.log("classified data", graphClassifyData);
+    console.log("classified data", graphClassifyData);
     return graphClassifyData;
   }
 
