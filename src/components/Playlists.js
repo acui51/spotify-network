@@ -28,7 +28,7 @@ const Playlists = ({
     const artists = artistInfo.map(({data}) => {
       return {
         artist_name: data.name,
-        artist_img: data.images[0].url,
+        artist_img: data.images[0]?.url,
       }
     })
 
