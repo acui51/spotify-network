@@ -42,21 +42,13 @@ export default function Home({ providers }) {
 
   const handleChange = (event) => {
     setClassify(false);
-    console.log("classify_", classify);
     setSelectedMetrics({
       ...selectedMetrics,
       [event.target.name]: event.target.checked,
     });
   };
 
-  const zoom = d3
-    .zoom()
-    .scaleExtent([0.5, 5])
-    // .translateExtent([
-    //   [0, 0],
-    //   [w + 200, h + 200],
-    // ])
-    .on("zoom", handleZoom);
+  const zoom = d3.zoom().scaleExtent([0.5, 5]).on("zoom", handleZoom);
 
   const drawGraph = () => {
     // Clear graph
@@ -64,8 +56,6 @@ export default function Home({ providers }) {
     const data = classify
       ? getClassifyGraphData(focusedPlaylist)
       : getGraphData(focusedPlaylist);
-    // const data = getClassifyGraphData(focusedPlaylist);
-    console.log("data", data);
     const width = 600;
     const height = 600;
 
@@ -101,13 +91,13 @@ export default function Home({ providers }) {
       .style("z-index", "10")
       .html((e) => {
         console.log("e", e);
-        return (
-          "Track Name: " +
-          e.target.__data__.id +
-          "<br><br>" +
-          "Artist: " +
-          e.target.__data__.artist
-        );
+        return e.target.__data__.artist
+          ? "Track Name: " +
+              e.target.__data__.id +
+              "<br><br>" +
+              "Artist: " +
+              e.target.__data__.artist
+          : "Artist: " + e.target.__data__.id;
       });
     group.call(tip);
 
@@ -617,7 +607,6 @@ export default function Home({ providers }) {
         });
       }
     }
-    console.log("classified data", graphClassifyData);
     return graphClassifyData;
   }
 
