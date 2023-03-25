@@ -12,8 +12,7 @@ import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import RadioGroup from "@mui/material/RadioGroup";
-import Radio from "@mui/material/Radio";
+import FormHelperText from "@mui/material/FormHelperText";
 import Checkbox from "@mui/material/Checkbox";
 import Button from "@mui/material/Button";
 
@@ -25,7 +24,7 @@ export default function Home({ providers }) {
   const [selectedPlaylistName, setSelectedPlaylistName] = useState("");
   const [isOnboardModalVisible, setIsOnboardModalVisible] = useState(true);
   const [isAboutModalVisible, setAboutModalVisible] = useState(false);
-  const [classify, setClassify] = useState(null);
+
   const [selectedMetrics, setSelectedMetrics] = useState({
     acousticness: false,
     energy: false,
@@ -41,12 +40,35 @@ export default function Home({ providers }) {
   });
 
   const handleChange = (event) => {
-    setClassify(false);
-    console.log("classify_", classify);
     setSelectedMetrics({
       ...selectedMetrics,
       [event.target.name]: event.target.checked,
     });
+  };
+
+  const drag = (simulation) => {
+    const dragstarted = (event) => {
+      if (!event.active) simulation.alphaTarget(0.3).restart();
+      event.subject.fx = event.subject.x;
+      event.subject.fy = event.subject.y;
+    };
+
+    const dragged = (event) => {
+      event.subject.fx = event.x;
+      event.subject.fy = event.y;
+    };
+
+    const dragended = (event) => {
+      if (!event.active) simulation.alphaTarget(0);
+      event.subject.fx = null;
+      event.subject.fy = null;
+    };
+
+    return d3
+      .drag()
+      .on("start", dragstarted)
+      .on("drag", dragged)
+      .on("end", dragended);
   };
 
   const zoom = d3
@@ -61,14 +83,12 @@ export default function Home({ providers }) {
   const drawGraph = () => {
     // Clear graph
     d3.select("#graph").html("");
-    const data = classify
-      ? getClassifyGraphData(focusedPlaylist)
-      : getGraphData(focusedPlaylist);
-    // const data = getClassifyGraphData(focusedPlaylist);
+    // const data = getGraphData(focusedPlaylist);
+    const data = getClassifyGraphData(focusedPlaylist);
     console.log("data", data);
     const width = 600;
     const height = 600;
-
+    
     // Create SVG
     const svg = d3
       .select("#graph")
@@ -78,6 +98,11 @@ export default function Home({ providers }) {
 
     const group = svg.append("g");
 
+    // Initialize the zoom
+    // const { height: h, width: w } = d3
+    //   .select("#graph")
+    //   .node()
+    //   .getBoundingClientRect();
     initZoom();
 
     const xScale = d3.scaleLinear().range([0, width]);
@@ -141,6 +166,7 @@ export default function Home({ providers }) {
         .join("line")
         .style("stroke", "#aaa")
         .style("stroke-width", function (d) {
+          console.log(d.value);
           return ((d.value - 0.9) / 0.9) * 10;
         });
     }
@@ -154,62 +180,36 @@ export default function Home({ providers }) {
       .attr("width", 32)
       .attr("height", 32)
       .attr("clip-path", "inset(0% round 15px)")
-      .style("outline", "3px solid black")
-      .style("border-radius", "50%")
       .on("mouseover", tip.show)
       .on("mouseout", tip.hide);
 
-    var linkForce = d3
-      .forceLink() // This force provides links between nodes
-      .id(function (d) {
-        return d.id;
-      })
-      .links(data.links);
+    // const node = group
+    //   .selectAll("circle")
+    //   .data(data.nodes)
+    //   .join("circle")
+    //   .attr("r", 14)
+    //   .style("fill", "#69b3a2")
+    //   .on("mouseover", tip.show)
+    //   .on("mouseout", tip.hide);
 
-    const simulation = classify
-      ? d3
-          .forceSimulation(data.nodes) // Force algorithm is applied to data.nodes
-          .force("link", linkForce)
-          .force("charge", d3.forceManyBody().strength(-200)) // This adds repulsion between nodes. Play with the -400 for the repulsion strength
-          .force(
-            "radial",
-            d3.forceRadial(
-              function (d) {
-                return d.group === 2 ? 300 : 600;
-              },
-              width / 2,
-              height / 2
-            )
-          )
-          // Let's list the force we wanna apply on the network
-          .force(
-            "center",
-            d3.forceCenter(
-              (window.innerWidth - 200) / 2,
-              window.innerHeight / 2
-            )
-          ) // This force attracts nodes to the center of the svg area
-          .on("end", ticked)
-      : d3
-          .forceSimulation(data.nodes) // Force algorithm is applied to data.nodes
-          .force(
-            "link",
-            d3
-              .forceLink() // This force provides links between nodes
-              .id(function (d) {
-                return d.id;
-              }) // This provide  the id of a node
-              .links(data.links) // and this the list of links
-          )
-          .force("charge", d3.forceManyBody().strength(-200)) // This adds repulsion between nodes. Play with the -400 for the repulsion strength
-          .force(
-            "center",
-            d3.forceCenter(
-              (window.innerWidth - 200) / 2,
-              window.innerHeight / 2
-            )
-          ) // This force attracts nodes to the center of the svg area
-          .on("end", ticked);
+    // Let's list the force we wanna apply on the network
+    const simulation = d3
+      .forceSimulation(data.nodes) // Force algorithm is applied to data.nodes
+      .force(
+        "link",
+        d3
+          .forceLink() // This force provides links between nodes
+          .id(function (d) {
+            return d.id;
+          }) // This provide  the id of a node
+          .links(data.links) // and this the list of links
+      )
+      .force("charge", d3.forceManyBody().strength(-200)) // This adds repulsion between nodes. Play with the -400 for the repulsion strength
+      .force(
+        "center",
+        d3.forceCenter((window.innerWidth - 200) / 2, window.innerHeight / 2)
+      ) // This force attracts nodes to the center of the svg area
+      .on("end", ticked);
 
     // ************* FUNCTIONS *************
     // This function is run at each iteration of the force algorithm, updating the nodes position.
@@ -340,163 +340,147 @@ export default function Home({ providers }) {
                 className="w-full h-screen overflow-y-scroll"
                 id="graph"
               ></div>
-              <div className="flex-row">
-                <div className="bg-white border border-gray-900 bg-opacity-80 rounded-lg m-2 px-2 pb-2 pt-1 text-lg opacity-80 drop-shadow-md">
-                  <Box sx={{ display: "flex" }}>
-                    <FormControl
-                      sx={{ m: 1 }}
-                      component="fieldset"
-                      variant="standard"
-                    >
-                      <FormLabel component="legend">
-                        Choose Classify Metrics
-                      </FormLabel>
-                      <RadioGroup
-                        value={classify}
-                        onChange={() => {
-                          setClassify(true);
-                          setSelectedMetrics({
-                            ...selectedMetrics,
-                            [event.target.name]: false,
-                          });
-                        }}
-                      >
-                        <FormControlLabel
-                          control={<Radio checked={classify === true} />}
-                          label="artists"
-                        />
-                        {/* <FormControlLabel control={<Radio checked={classify === false}/>} label="genres" /> */}
-                        <Button onClick={drawGraph}>Graph!</Button>
-                      </RadioGroup>
-                    </FormControl>
-                  </Box>
-                </div>
-                <div className="bg-white border border-gray-900 bg-opacity-80 rounded-lg m-2 px-2 pb-2 pt-1 right-0 bottom-0 text-lg opacity-80 flex flex-row drop-shadow-md">
-                  <Box sx={{ display: "flex" }}>
-                    <FormControl
-                      sx={{ m: 1 }}
-                      component="fieldset"
-                      variant="standard"
-                    >
-                      <FormLabel component="legend">
-                        Choose Similarity Metrics
-                      </FormLabel>
-                      <FormGroup>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={selectedMetrics.acousticness}
-                              onChange={handleChange}
-                              name="acousticness"
-                            />
-                          }
-                          label="acousticness"
-                        />
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={selectedMetrics.energy}
-                              onChange={handleChange}
-                              name="energy"
-                            />
-                          }
-                          label="energy"
-                        />
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={selectedMetrics.instrumentalness}
-                              onChange={handleChange}
-                              name="instrumentalness"
-                            />
-                          }
-                          label="instrumentalness"
-                        />
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={selectedMetrics.key}
-                              onChange={handleChange}
-                              name="key"
-                            />
-                          }
-                          label="key"
-                        />
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={selectedMetrics.liveness}
-                              onChange={handleChange}
-                              name="liveness"
-                            />
-                          }
-                          label="liveness"
-                        />
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={selectedMetrics.loudness}
-                              onChange={handleChange}
-                              name="loudness"
-                            />
-                          }
-                          label="loudness"
-                        />
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={selectedMetrics.mode}
-                              onChange={handleChange}
-                              name="mode"
-                            />
-                          }
-                          label="mode"
-                        />
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={selectedMetrics.speechiness}
-                              onChange={handleChange}
-                              name="speechiness"
-                            />
-                          }
-                          label="speechiness"
-                        />
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={selectedMetrics.tempo}
-                              onChange={handleChange}
-                              name="tempo"
-                            />
-                          }
-                          label="tempo"
-                        />
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={selectedMetrics.time_signature}
-                              onChange={handleChange}
-                              name="time_signature"
-                            />
-                          }
-                          label="time_signature"
-                        />
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={selectedMetrics.valence}
-                              onChange={handleChange}
-                              name="valence"
-                            />
-                          }
-                          label="valence"
-                        />
-                        <Button onClick={drawGraph}>Graph!</Button>
-                      </FormGroup>
-                    </FormControl>
-                  </Box>
-                </div>
+              <div className="bg-white border border-gray-900 bg-opacity-80 rounded-lg m-2 px-2 pb-2 pt-1 absolute right-0 bottom-0 text-lg opacity-80 flex flex-row drop-shadow-md">
+                <Box sx={{ display: "flex" }}>
+                  <FormControl
+                    sx={{ m: 1 }}
+                    component="fieldset"
+                    variant="standard"
+                  >
+                    <FormLabel component="legend">
+                      Choose Similarity Metrics
+                    </FormLabel>
+                    <FormGroup>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.acousticness}
+                            onChange={handleChange}
+                            name="acousticness"
+                          />
+                        }
+                        label="acousticness"
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.energy}
+                            onChange={handleChange}
+                            name="energy"
+                          />
+                        }
+                        label="energy"
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.instrumentalness}
+                            onChange={handleChange}
+                            name="instrumentalness"
+                          />
+                        }
+                        label="instrumentalness"
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.key}
+                            onChange={handleChange}
+                            name="key"
+                          />
+                        }
+                        label="key"
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.liveness}
+                            onChange={handleChange}
+                            name="liveness"
+                          />
+                        }
+                        label="liveness"
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.loudness}
+                            onChange={handleChange}
+                            name="loudness"
+                          />
+                        }
+                        label="loudness"
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.mode}
+                            onChange={handleChange}
+                            name="mode"
+                          />
+                        }
+                        label="mode"
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.speechiness}
+                            onChange={handleChange}
+                            name="speechiness"
+                          />
+                        }
+                        label="speechiness"
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.tempo}
+                            onChange={handleChange}
+                            name="tempo"
+                          />
+                        }
+                        label="tempo"
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.time_signature}
+                            onChange={handleChange}
+                            name="time_signature"
+                          />
+                        }
+                        label="time_signature"
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selectedMetrics.valence}
+                            onChange={handleChange}
+                            name="valence"
+                          />
+                        }
+                        label="valence"
+                      />
+                      <Button onClick={drawGraph}>Graph!</Button>
+                    </FormGroup>
+                  </FormControl>
+                </Box>
+                {/* <div> OLD FORM
+              <form>
+                <div className="font-bold text-center">Similarity Metric</div>
+                {similarityTypes.map((e) => (
+                  <label className="flex flex-row" key={e.value}>
+                    <input
+                      type="radio"
+                      value={e.value}
+                      checked={similarityMetric === e.value}
+                      onChange={handleChange}
+                    />
+                    <span className="ml-2">{e.label}</span>
+                  </label>
+                ))}
+              </form>
+            </div> */}
               </div>
             </div>
           </>
@@ -515,7 +499,7 @@ export default function Home({ providers }) {
         id: trackName,
         artist: tracks[i].metadata.artists[0]["name"],
         group: 1,
-        img_url: tracks[i].metadata.album.images?.[0]?.url,
+        img_url: tracks[i].metadata.album.images?.[0].url,
       });
       const trackFeature = [];
       for (let key of Object.keys(selectedMetrics)) {
@@ -555,44 +539,35 @@ export default function Home({ providers }) {
 
     // filter for only strong relations
     graphData.links = graphData.links.filter((link) => link.value > 0.99);
+
     console.log("graphData", graphData);
     return graphData;
   }
 
-  function artist_img_url(artistName) {
-    return tracks;
-  }
   function getClassifyGraphData(tracks) {
+    console.log("in classify");
     const graphClassifyData = { nodes: [], links: [] };
-    const artistSet = new Set();
     graphClassifyData.nodes.push({
       id: "Spotify",
       group: 1,
-      img_url:
-        "https://i0.wp.com/wdevradio.com/wp-content/uploads/2021/09/Spotify-logo-cropped.jpg?ssl=1",
+      img_url: "https://i0.wp.com/wdevradio.com/wp-content/uploads/2021/09/Spotify-logo-cropped.jpg?ssl=1",
     });
     for (let i = 0; i < tracks.length; i++) {
       const artists = tracks[i].metadata.artists;
       const trackName = tracks[i].metadata.name;
-      graphClassifyData.nodes.push({
-        id: trackName,
-        artist: artists[0].name,
-        group: 3,
-        img_url: tracks[i].metadata.album.images?.[0].url,
-      });
       if (Array.isArray(artists)) {
         artists.forEach((artist) => {
-          const artistName = artist.name;
-          if (!artistSet.has(artistName)) {
-            graphClassifyData.nodes.push({
-              id: artistName,
-              group: 2,
-              img_url: tracks[i].metadata.artist_info.find(
-                ({ artist_name }) => artist_name === artistName
-              ).artist_img,
-            });
-          }
-          artistSet.add(artistName);
+          const artistName = artist.name; 
+          graphClassifyData.nodes.push({
+            id: trackName,
+            group: 3,
+            img_url: tracks[i].metadata.album.images?.[0].url,
+          });
+          graphClassifyData.nodes.push({
+            id: artistName,
+            group: 2,
+            img_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Location_dot_black.svg/800px-Location_dot_black.svg.png",
+          });
           graphClassifyData.links.push({
             source: artistName,
             target: trackName,
@@ -602,7 +577,7 @@ export default function Home({ providers }) {
             source: artistName,
             target: "Spotify",
             value: 3,
-          });
+          })
         });
       } else {
         graphClassifyData.links.push({
@@ -614,7 +589,7 @@ export default function Home({ providers }) {
           source: tracks[i].metadata.artists[0]["name"],
           target: "Spotify",
           value: 3,
-        });
+        })
       }
     }
     console.log("classified data", graphClassifyData);
