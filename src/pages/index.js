@@ -154,6 +154,8 @@ export default function Home({ providers }) {
       .attr("width", 32)
       .attr("height", 32)
       .attr("clip-path", "inset(0% round 15px)")
+      .style("outline", "3px solid black")
+      .style("border-radius", "50%")
       .on("mouseover", tip.show)
       .on("mouseout", tip.hide);
 
@@ -513,7 +515,7 @@ export default function Home({ providers }) {
         id: trackName,
         artist: tracks[i].metadata.artists[0]["name"],
         group: 1,
-        img_url: tracks[i].metadata.album.images?.[0].url,
+        img_url: tracks[i].metadata.album.images?.[0]?.url,
       });
       const trackFeature = [];
       for (let key of Object.keys(selectedMetrics)) {
